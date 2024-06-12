@@ -5,6 +5,12 @@ import AppleHealthKit, {
   type HealthValue,
 } from 'react-native-health';
 
+import {
+  initialize,
+  requestPermission,
+  readRecords,
+} from 'react-native-health-connect';
+
 export function multiply(a: number, b: number): Promise<number> {
   return Promise.resolve(a * b);
 }
@@ -46,3 +52,27 @@ export function getSteps(): Promise<HealthValue[]> {
     });
   });
 }
+
+export const getActiveCaloriesBurned = async () => {
+  const isInitialized = await initialize();
+
+  if (!isInitialized) {
+    throw new Error('Initialization failed');
+  }
+
+  const grantedPermissions = await requestPermission([
+    { accessType: 'read', recordType: 'ActiveCaloriesBurned' },
+  ]);
+
+  if (!grantedPermissions) {
+    throw new Error('Permission not granted');
+  }
+
+  return readRecords('ActiveCaloriesBurned', {
+    timeRangeFilter: {
+      operator: 'between',
+      startTime: '2023-01-09T12:00:00.405Z',
+      endTime: '2023-01-09T23:53:15.405Z',
+    },
+  });
+};
